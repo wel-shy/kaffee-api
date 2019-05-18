@@ -169,6 +169,8 @@ export class MySQLResourceRepository<T extends IBaseMySQLModel>
    */
   public async store(data: any): Promise<T> {
     let entity: T;
+    console.log(this.table);
+    console.log(this.type);
 
     try {
       entity = await getManager()

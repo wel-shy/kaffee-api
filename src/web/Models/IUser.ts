@@ -8,7 +8,6 @@ export interface IUser {
   email: string;
   password: string;
   iv: string;
-  coffeeCount: number;
   coffees: ICoffee[];
 
   getId(): number;

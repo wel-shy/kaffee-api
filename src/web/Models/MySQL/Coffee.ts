@@ -3,8 +3,7 @@ import {
   Column,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  JoinColumn
+  PrimaryGeneratedColumn
 } from "typeorm";
 import IBaseModel from "../IBaseModel";
 import { ICoffee } from "../ICoffee";

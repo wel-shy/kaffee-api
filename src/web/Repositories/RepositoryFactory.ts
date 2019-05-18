@@ -1,4 +1,5 @@
 import { BaseEntity } from "typeorm";
+import { Coffee } from "../Models/MySQL/Coffee";
 import IBaseMySQLModel from "../Models/MySQL/IBaseMySQLModel";
 import { User } from "../Models/MySQL/User";
 import { IResourceRepository } from "./IResourceRepository";
@@ -29,6 +30,9 @@ export default class RepositoryFactory {
     switch (res) {
       case "user":
         repository = new MySQLResourceRepository<User>(User);
+        break;
+      case "coffee":
+        repository = new MySQLResourceRepository<Coffee>(Coffee);
         break;
       default:
         repository = new MySQLResourceRepository<IBaseMySQLModel>(BaseEntity);

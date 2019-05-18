@@ -26,9 +26,6 @@ export class User extends BaseEntity implements IBaseModel, IUser {
   @Column("varchar")
   public iv: string;
 
-  @Column("int")
-  public coffeeCount: number;
-
   @OneToMany((type: any) => Coffee, (coffee: any) => coffee.user)
   public coffees: Coffee[];
 
@@ -42,7 +39,6 @@ export class User extends BaseEntity implements IBaseModel, IUser {
    */
   public toJSONObject(): {} {
     return {
-      coffeeCount: this.coffeeCount,
       email: this.email,
       id: this.id,
       iv: this.iv,

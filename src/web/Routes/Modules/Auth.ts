@@ -74,7 +74,7 @@ export class Auth extends BaseRouter {
   ): Promise<Response | void> {
     const authController: AuthController = new AuthController();
     // Get username and password
-    const username: string = req.body.username;
+    const email: string = req.body.email;
     const password: string = req.body.password;
     const iv: string = CryptoHelper.getRandomString(16);
     const userRepository: IResourceRepository<
@@ -83,8 +83,8 @@ export class Auth extends BaseRouter {
     let user: IUser;
 
     // abort if either username or password are null
-    if (!username || !password) {
-      return next(new BadRequest("username or password cannot be empty"));
+    if (!email || !password) {
+      return next(new BadRequest("email or password cannot be empty"));
     }
 
     // Generate the hashed password
@@ -92,7 +92,7 @@ export class Auth extends BaseRouter {
 
     // Store the user
     try {
-      user = await userRepository.store({ username, password: hash, iv });
+      user = await userRepository.store({ email, password: hash, iv });
     } catch (error) {
       // If user name already exists throw 403
       if (error.message.indexOf("duplicate key error") > -1) {

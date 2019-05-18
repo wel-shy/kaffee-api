@@ -31,7 +31,9 @@ export class App {
     try {
       await this.connectToDB();
     } catch (e) {
+      // tslint:disable-next-line: no-console
       console.error(e);
+      // tslint:disable-next-line: no-console
       console.error("Could not connect to database");
       process.exit(1);
     }
