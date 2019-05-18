@@ -1,6 +1,13 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn
+} from "typeorm";
 import IBaseModel from "../IBaseModel";
 import { IUser } from "../IUser";
+import { Coffee } from "./Coffee";
 
 /**
  * User MySQL implementation
@@ -21,6 +28,9 @@ export class User extends BaseEntity implements IBaseModel, IUser {
 
   @Column("int")
   public coffeeCount: number;
+
+  @OneToMany((type: any) => Coffee, (coffee: any) => coffee.user)
+  public coffees: Coffee[];
 
   public getId(): number {
     return this.id;

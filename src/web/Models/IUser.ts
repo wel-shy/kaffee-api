@@ -1,3 +1,5 @@
+import { ICoffee } from "./ICoffee";
+
 /**
  * Interface for a user.
  */
@@ -7,6 +9,7 @@ export interface IUser {
   password: string;
   iv: string;
   coffeeCount: number;
+  coffees: ICoffee[];
 
   getId(): number;
   toJSONObject(): {};

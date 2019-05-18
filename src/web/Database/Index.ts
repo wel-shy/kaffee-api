@@ -1,5 +1,6 @@
 import { Connection, createConnection } from "typeorm";
 import { User } from "../Models/MySQL/User";
+import { Coffee } from "../Models/MySQL/Coffee";
 
 /**
  * Get a connection to the MySQL database.
@@ -7,7 +8,7 @@ import { User } from "../Models/MySQL/User";
 export async function getMySQLConnection(): Promise<Connection> {
   return await createConnection({
     database: process.env.DB_DATABASE,
-    entities: [User],
+    entities: [User, Coffee],
     host: process.env.DB_HOST,
     logging: false,
     password: process.env.DB_PASSWORD,
