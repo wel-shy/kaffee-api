@@ -1,0 +1,40 @@
+version: '2'
+services:
+  web:
+      build: .
+      ports:
+      - 3000:80
+      volumes:
+      - "./src/web:/app/web"
+      - "./src/App.ts:/app/App.ts"
+      - "./.env:/app/.env"
+      - "./dist:/app/dist"
+      - "./test:/app/test"
+      depends_on:
+        - mysql
+      links:
+        - mysql
+      environment:
+         LOCAL: ${LOCAL}
+         DEBUG: ${DEBUG}
+         SECRET: ${SECRET}
+         DB_USERNAME: ${DB_USERNAME}
+         DB_HOST: ${DB_HOST}
+         DB_PORT: ${DB_PORT}
+         DB_PASSWORD: ${DB_PASSWORD}
+         DB_DATABASE: ${DB_DATABASE}
+
+  mysql:
+    image: mysql:5.7
+    command: --explicit_defaults_for_timestamp
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: kaffee
+    volumes:
+      - mysql_database:/var/lib/mysql
+    restart: always
+
+volumes:
+  mysql_database:
