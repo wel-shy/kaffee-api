@@ -1,8 +1,13 @@
-import { BadRequest, Forbidden } from "@curveball/http-errors";
+import {
+  BadRequest,
+  Forbidden,
+  InternalServerError,
+  NotFound
+} from "@curveball/http-errors";
 import { NextFunction, Request, Response } from "express";
 import AuthController from "../../Controllers/AuthController";
 import CryptoHelper from "../../CryptoHelper";
-import { HttpMethods as Methods } from "../../HttpMethods";
+import { HttpMethods, HttpMethods as Methods } from "../../HttpMethods";
 import { IUser } from "../../Models/IUser";
 import { Reply } from "../../Reply";
 import { IResourceRepository } from "../../Repositories/IResourceRepository";
@@ -22,6 +27,7 @@ export class Auth extends BaseRouter {
     super();
     this.addRoute("/authenticate", Methods.POST, this.authenticateUser);
     this.addRoute("/register", Methods.POST, this.registerUser);
+    this.addRoute("/token", HttpMethods.GET, this.getToken);
   }
 
   /**
@@ -39,13 +45,13 @@ export class Auth extends BaseRouter {
   ): Promise<Response | void> {
     const authController: AuthController = new AuthController();
     // Get username and password from request
-    const username: string = req.body.username;
+    const email: string = req.body.email;
     const password: string = req.body.password;
     let user: IUser;
 
     // Try to authenticate
     try {
-      user = await authController.authenticateUser(username, password);
+      user = await authController.authenticateUser(email, password);
     } catch (error) {
       // Throw auth errors
       return next(error);
@@ -55,8 +61,62 @@ export class Auth extends BaseRouter {
     const token = authController.generateToken(user);
 
     // Return token
-    const response = new Reply(200, "success", false, { token });
+    const response = new Reply(200, "success", false, {
+      refreshToken: user.refreshToken,
+      token
+    });
     return res.json(response);
+  }
+
+  /**
+   * Generate a token from a refresh token.
+   *
+   * @param req Request
+   * @param res Response
+   * @param next NextFunction
+   */
+  public async getToken(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> {
+    const authController: AuthController = new AuthController();
+    const userController: IResourceRepository<
+      IUser
+    > = RepositoryFactory.getRepository("user");
+    const refreshToken: string = req.body.refreshToken;
+    let user: IUser;
+    let decoded: any;
+
+    // Check for refresh token
+    if (!refreshToken) {
+      return next(new BadRequest("refreshToken missing"));
+    }
+
+    // Decode the refresh token
+    try {
+      decoded = await authController.decodeToken(refreshToken, true);
+    } catch (e) {
+      return next(e);
+    }
+
+    // Fetch the user
+    try {
+      user = await userController.get(decoded.id);
+    } catch (e) {
+      return next(new InternalServerError("Could not fetch user"));
+    }
+
+    // Abort if user not found
+    if (!user) {
+      return next(new NotFound("user not found"));
+    }
+
+    // Generate a token
+    const token = authController.generateToken(user, "1 day");
+
+    // Return a token
+    return res.json(new Reply(200, "success", true, { token }));
   }
 
   /**
@@ -81,6 +141,7 @@ export class Auth extends BaseRouter {
       IUser
     > = RepositoryFactory.getRepository("user");
     let user: IUser;
+    let refreshToken: string;
 
     // abort if either username or password are null
     if (!email || !password) {
@@ -101,11 +162,26 @@ export class Auth extends BaseRouter {
       return next(error);
     }
 
+    try {
+      refreshToken = authController.generateToken(user);
+      await userRepository.edit(user.id, {
+        refreshToken
+      });
+    } catch (e) {
+      return next(
+        new InternalServerError("Could not store user's refresh token")
+      );
+    }
+
     // Generate token
-    const token = authController.generateToken(user);
+    const token = authController.generateToken(user, "1 day");
 
     // Return new user and token
-    const response = new Reply(200, "success", false, { user, token });
+    const response = new Reply(200, "success", false, {
+      user,
+      token,
+      refreshToken
+    });
     return res.json(response);
   }
 }

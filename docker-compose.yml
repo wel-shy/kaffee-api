@@ -18,6 +18,7 @@ services:
          LOCAL: ${LOCAL}
          DEBUG: ${DEBUG}
          SECRET: ${SECRET}
+         REFRESH_SECRET: ${REFRESH_SECRET}
          DB_USERNAME: ${DB_USERNAME}
          DB_HOST: ${DB_HOST}
          DB_PORT: ${DB_PORT}

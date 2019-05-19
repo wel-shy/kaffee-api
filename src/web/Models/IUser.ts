@@ -9,6 +9,7 @@ export interface IUser {
   password: string;
   iv: string;
   coffees: ICoffee[];
+  refreshToken: string;
 
   getId(): number;
   toJSONObject(): {};

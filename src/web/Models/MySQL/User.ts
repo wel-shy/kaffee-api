@@ -17,7 +17,10 @@ export class User extends BaseEntity implements IBaseModel, IUser {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column("varchar")
+  @Column({
+    type: "varchar",
+    unique: true
+  })
   public email: string;
 
   @Column("varchar")
@@ -25,6 +28,12 @@ export class User extends BaseEntity implements IBaseModel, IUser {
 
   @Column("varchar")
   public iv: string;
+
+  @Column({
+    nullable: true,
+    type: "varchar"
+  })
+  public refreshToken: string;
 
   @OneToMany((type: any) => Coffee, (coffee: any) => coffee.user)
   public coffees: Coffee[];
@@ -41,8 +50,7 @@ export class User extends BaseEntity implements IBaseModel, IUser {
     return {
       email: this.email,
       id: this.id,
-      iv: this.iv,
-      password: this.password
+      iv: this.iv
     };
   }
 }

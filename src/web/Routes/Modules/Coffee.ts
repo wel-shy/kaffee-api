@@ -1,13 +1,13 @@
+import { InternalServerError, NotFound } from "@curveball/http-errors/dist";
 import { NextFunction, Request, Response } from "express";
 import { HttpMethods } from "../../HttpMethods";
-import { BaseRouter } from "../BaseRouter";
-import RepositoryFactory from "../../Repositories/RepositoryFactory";
-import { IUser } from "../../Models/IUser";
-import { InternalServerError, NotFound } from "@curveball/http-errors/dist";
-import { Coffee } from "../../Models/MySQL/Coffee";
-import { Reply } from "../../Reply";
 import { checkToken } from "../../Middleware/Authenticate";
+import { IUser } from "../../Models/IUser";
+import { Coffee } from "../../Models/MySQL/Coffee";
 import { User } from "../../Models/MySQL/User";
+import { Reply } from "../../Reply";
+import RepositoryFactory from "../../Repositories/RepositoryFactory";
+import { BaseRouter } from "../BaseRouter";
 
 export default class CoffeeRouter extends BaseRouter {
   constructor() {
@@ -52,10 +52,8 @@ export default class CoffeeRouter extends BaseRouter {
     coffee.user = user as User;
 
     try {
-      console.log(JSON.stringify(coffee, null, 2));
       coffee = await coffeeRepository.store(coffee);
     } catch (e) {
-      console.error(e);
       return next(new InternalServerError("Could not store coffee"));
     }
 

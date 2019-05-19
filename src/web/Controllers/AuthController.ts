@@ -18,7 +18,7 @@ export default class AuthController {
    * @return {IMongoUser} Matched user
    */
   public async authenticateUser(
-    username: string,
+    email: string,
     password: string
   ): Promise<IUser> {
     const userRepository: IResourceRepository<
@@ -28,7 +28,7 @@ export default class AuthController {
 
     // Get user
     try {
-      user = await userRepository.findOneWithFilter({ username });
+      user = await userRepository.findOneWithFilter({ email });
     } catch (error) {
       // Throw if db failure
       throw new InternalServerError(error.message);
@@ -52,16 +52,42 @@ export default class AuthController {
   /**
    * Create a JWT token for the user
    * @param  user IMongoUser
+   * @param expiresIn String value for expiration, for 1 day it would be `1 day`
    * @return
    */
-  public generateToken(user: IUser): string {
+  public generateToken(user: IUser, expiresIn?: string): string {
     const payload = {
-      id: user.id,
-      username: user.email
+      email: user.email,
+      id: user.id
     };
-    // create and sign token against the app secret
-    return jwt.sign(payload, process.env.SECRET, {
-      expiresIn: "1 day" // expires in 24 hours
+
+    if (expiresIn) {
+      // create and sign token against the app secret
+      return jwt.sign(payload, process.env.SECRET, {
+        expiresIn // expires in 24 hours
+      });
+    }
+
+    return jwt.sign(payload, process.env.REFRESH_SECRET);
+  }
+
+  /**
+   * Decode a JWT token.
+   *
+   * @param token jwt token
+   * @param refresh refresh token flag
+   */
+  public decodeToken(token: string, refresh?: boolean): Promise<any> {
+    const secret = refresh ? process.env.REFRESH_SECRET : process.env.SECRET;
+
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, secret, (err: Error, data: any) => {
+        if (err) {
+          reject(new Unauthorized("Token invalid"));
+        } else {
+          return resolve(data);
+        }
+      });
     });
   }
 }

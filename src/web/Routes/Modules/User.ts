@@ -1,12 +1,12 @@
 import { InternalServerError } from "@curveball/http-errors/dist";
 import { NextFunction, Request, Response } from "express";
 import { HttpMethods } from "../../HttpMethods";
+import { checkToken } from "../../Middleware/Authenticate";
 import { ICoffee } from "../../Models/ICoffee";
 import { IUser } from "../../Models/IUser";
 import { Reply } from "../../Reply";
 import RepositoryFactory from "../../Repositories/RepositoryFactory";
 import { BaseRouter } from "../BaseRouter";
-import { checkToken } from "../../Middleware/Authenticate";
 
 export default class User extends BaseRouter {
   constructor() {

@@ -1,6 +1,6 @@
 import { Connection, createConnection } from "typeorm";
-import { User } from "../Models/MySQL/User";
 import { Coffee } from "../Models/MySQL/Coffee";
+import { User } from "../Models/MySQL/User";
 
 /**
  * Get a connection to the MySQL database.
