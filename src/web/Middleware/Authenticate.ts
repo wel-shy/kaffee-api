@@ -2,6 +2,7 @@ import { Unauthorized } from "@curveball/http-errors";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 import { IUser } from "../Models/IUser";
+import AuthController from "../Controllers/AuthController";
 
 /**
  * Check the users access token.
@@ -11,7 +12,7 @@ import { IUser } from "../Models/IUser";
  * @param {e.Response} res
  * @param {e.NextFunction} next
  */
-export function checkToken(
+export async function checkToken(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -21,20 +22,18 @@ export function checkToken(
     req.query.token ||
     req.headers["x-access-token"] ||
     req.params.token;
+  let decoded: any;
 
   // If there is token then verify
   if (token) {
-    jwt.verify(token, process.env.SECRET, (err: Error, user: IUser) => {
-      if (err) {
-        // Add error to locals
-        res.locals.error = new Unauthorized(err.message);
-        return next();
-      } else {
-        // Add user to locals and move to next function if token is valid
-        res.locals.user = user;
-        return next();
-      }
-    });
+    try {
+      decoded = await new AuthController().decodeToken(token);
+    } catch (e) {
+      return next(e);
+    }
+
+    res.locals.user = decoded;
+    return next();
   } else {
     // No token, add error and move to error handler
     res.locals.error = new Unauthorized("no token provided");

@@ -58,7 +58,7 @@ export class Auth extends BaseRouter {
     }
 
     // Generate a token
-    const token = authController.generateToken(user);
+    const token = authController.generateToken(user, "1 day");
 
     // Return token
     const response = new Reply(200, "success", false, {
@@ -178,9 +178,9 @@ export class Auth extends BaseRouter {
 
     // Return new user and token
     const response = new Reply(200, "success", false, {
-      user,
+      refreshToken,
       token,
-      refreshToken
+      user
     });
     return res.json(response);
   }
