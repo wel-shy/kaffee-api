@@ -34,7 +34,9 @@ export default class User extends BaseRouter {
 
     try {
       user = await userRepository.get(res.locals.user.id);
-      coffees = user.coffees;
+      coffees = await coffeeRepository.findManyWithFilter({
+        user: user.getId()
+      });
     } catch (e) {
       return next(
         new InternalServerError("Something went wrong fetching resources")
