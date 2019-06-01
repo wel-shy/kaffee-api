@@ -27,7 +27,7 @@ export class Auth extends BaseRouter {
     super();
     this.addRoute("/authenticate", Methods.POST, this.authenticateUser);
     this.addRoute("/register", Methods.POST, this.registerUser);
-    this.addRoute("/token", HttpMethods.GET, this.getToken);
+    this.addRoute("/token", HttpMethods.POST, this.getToken);
   }
 
   /**
