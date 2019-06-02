@@ -18,7 +18,7 @@ COPY tsconfig.json /app/tsconfig.json
 RUN yarn run build
 
 # Expose port 80
-EXPOSE 80
+EXPOSE 8008
 
 # Start the server.
 CMD npx nodemon dist/App.js

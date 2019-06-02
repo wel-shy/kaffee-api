@@ -1,6 +1,6 @@
 import { App } from "./web/Server";
 
-const port = 80;
+const port = 8008;
 const app = new App();
 
 app.initialiseServer().then(() => {
