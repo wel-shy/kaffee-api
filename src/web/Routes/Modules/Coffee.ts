@@ -8,6 +8,7 @@ import { Coffee } from "../../Models/MySQL/Coffee";
 import { User } from "../../Models/MySQL/User";
 import { Reply } from "../../Reply";
 import { IResourceRepository } from "../../Repositories/IResourceRepository";
+import MYSQLCoffeeRepository from "../../Repositories/MYSQLCoffeeRepository";
 import RepositoryFactory from "../../Repositories/RepositoryFactory";
 import { BaseRouter } from "../BaseRouter";
 
@@ -18,6 +19,7 @@ export default class CoffeeRouter extends BaseRouter {
     this.addRoute("/", HttpMethods.POST, this.store);
     this.addRoute("/count", HttpMethods.GET, this.count);
     this.addRoute("/", HttpMethods.GET, this.index);
+    this.addRoute("/date", HttpMethods.GET, this.dailyCount);
   }
 
   /**
@@ -116,5 +118,20 @@ export default class CoffeeRouter extends BaseRouter {
     }
 
     return res.json(new Reply(200, "success", false, { count: coffees }));
+  }
+
+  public async dailyCount(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> {
+    const coffeeRepository: MYSQLCoffeeRepository = new MYSQLCoffeeRepository(
+      Coffee
+    );
+
+    const coffeeCount = await coffeeRepository.coffeePerDate(
+      res.locals.user.id
+    );
+    return res.json(new Reply(200, "success", false, coffeeCount));
   }
 }
