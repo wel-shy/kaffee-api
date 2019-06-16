@@ -2,6 +2,7 @@ using Kaffee.Models;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kaffee.Services
 {
@@ -21,6 +22,12 @@ namespace Kaffee.Services
 
         public User Get(string id) =>
             _users.Find<User>(user => user.Id == id).FirstOrDefault();
+
+        public Task<User> GetWithToken(string token) =>
+            _users.Find<User>(user => user.RefreshToken == token).FirstOrDefaultAsync();
+
+        public Task<User> GetWithEmail(string email) =>
+            _users.Find<User>(user => user.Email == email).FirstOrDefaultAsync();
 
         public User Create(User user)
         {
