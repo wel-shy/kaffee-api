@@ -1,6 +1,9 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using Kaffee.Models;
 using Kaffee.Services;
+using Kaffee.Providers;
+using System.Threading.Tasks;
 
 namespace Kaffee.Controllers 
 {
@@ -29,10 +32,17 @@ namespace Kaffee.Controllers
         }
 
         [HttpPost]
-        public ActionResult<User> Create(User user)
+        public async Task<ActionResult<User>> Create(User user)
         {
+            if (await _userService.GetWithEmail(user.Email) != null) 
+            {
+                return Unauthorized("Email already exists.");
+            }
+            var salt = HashProvider.GetSalt();
+            user.Password = HashProvider.GetHash(user.Password, salt);
+            user.CreatedAt = DateTime.Now;
+            
             _userService.Create(user);
-
             return CreatedAtRoute("GetUser", new { id = user.Id.ToString() }, user);
         }
 
@@ -62,7 +72,6 @@ namespace Kaffee.Controllers
             }
 
             _userService.Remove(user.Id);
-
             return NoContent();
         }
     }

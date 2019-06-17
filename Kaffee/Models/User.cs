@@ -1,6 +1,7 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kaffee.Models
 {
@@ -13,8 +14,10 @@ namespace Kaffee.Models
         [BsonElement("Date")]
         public DateTime CreatedAt { get; set; }
         
+        [Required, StringLength(100)]
         public string Email { get; set; }
 
+        [Required, StringLength(100, MinimumLength = 6)]
         public string Password { get; set; }
 
         public string RefreshToken { get; set; }
