@@ -1,11 +1,16 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Kaffee.Models;
 using Kaffee.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.Linq;
 
 namespace Kaffee.Controllers 
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class CoffeeController : ControllerBase
     {
@@ -17,13 +22,18 @@ namespace Kaffee.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Coffee>> Get() =>
-            _coffeeService.Get();
+        public ActionResult<List<Coffee>> Get()
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            var id = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+
+            return _coffeeService.Get(id.Value);
+        }
 
         [HttpGet("{id:length(24)}", Name = "GetCoffee")]
         public ActionResult<Coffee> Get(string id)
         {
-            var coffee = _coffeeService.Get(id);
+            var coffee = _coffeeService.GetWithId(id);
             if (coffee == null)
             {
                 return NotFound();
@@ -35,6 +45,12 @@ namespace Kaffee.Controllers
         [HttpPost]
         public ActionResult<Coffee> Create(Coffee coffee)
         {
+            var identity = User.Identity as ClaimsIdentity;
+            var id = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+
+            coffee.UserId = id.Value;
+            coffee.CreatedAt = DateTime.Now;
+
             _coffeeService.Create(coffee);
             return CreatedAtRoute("GetCoffee", new { id = coffee.Id.ToString() }, coffee);
         }
@@ -56,7 +72,7 @@ namespace Kaffee.Controllers
         [HttpDelete("{id:length(24)}")]
         public IActionResult Delete(string id)
         {
-            var coffee = _coffeeService.Get(id);
+            var coffee = _coffeeService.GetWithId(id);
             if (coffee == null)
             {
                 return NotFound();

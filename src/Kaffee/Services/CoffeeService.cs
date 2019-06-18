@@ -19,10 +19,10 @@ namespace Kaffee.Services
             _coffees = database.GetCollection<Coffee>(settings.CoffeeCollectionName);
         }
 
-        public List<Coffee> Get() =>
-            _coffees.Find(coffee => true).ToList();
+        public List<Coffee> Get(string userId) =>
+            _coffees.Find(coffee => coffee.UserId.Equals(userId)).ToList();
 
-        public Coffee Get(string id) =>
+        public Coffee GetWithId(string id) =>
             _coffees.Find<Coffee>(coffee => coffee.Id == id).FirstOrDefault();
 
         public Coffee Create(Coffee coffee)
