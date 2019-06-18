@@ -26,7 +26,9 @@ namespace Kaffee.Providers
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
-                return Encoding.Default.GetString(salt);
+                return BitConverter
+                    .ToString(salt)
+                    .Replace("-", string.Empty);
             }
         }
     }

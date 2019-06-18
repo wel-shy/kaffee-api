@@ -1,12 +1,10 @@
 using System.Threading.Tasks;
 using System.Security.Claims;
 using System;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using Kaffee.Services;
 using Kaffee.Models;
+using Kaffee.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 
@@ -19,6 +17,7 @@ namespace Kaffee.Controllers
     {
         private UserService _userService;
         private IConfiguration _configuration;
+
         public TokenController(IConfiguration _configuration, UserService _userService)
         {
             this._userService = _userService;
@@ -34,25 +33,21 @@ namespace Kaffee.Controllers
             {
                 return Unauthorized();
             }
-
             var claims = new[]
             {
                 new Claim(ClaimTypes.PrimarySid, user.Id),
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecurityKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                issuer: "kaffee.dwelsh.uk",
-                audience: "kaffee.dwelsh.uk",
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds);
-
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token)
+                token = TokenProvider.GetToken
+                    (
+                        user, 
+                        _configuration["SecurityKey"], 
+                        DateTime.Now.AddDays(1), 
+                        claims
+                    )
             });
         }
 
@@ -61,7 +56,13 @@ namespace Kaffee.Controllers
         public async Task<IActionResult> RequestTokenWithCredentials(LoginRequest loginRequest)
         {
             var user = await _userService.GetWithEmail(loginRequest.Email);
-            if (user == null || !user.Password.Equals(loginRequest.Password)) 
+            if (user == null)
+            {
+                return Unauthorized();
+            } 
+
+            var match = HashProvider.GetHash(loginRequest.Password, user.IV);
+            if (!user.Password.Equals(HashProvider.GetHash(loginRequest.Password, user.IV))) 
             {
                 return Unauthorized();
             }
@@ -72,18 +73,16 @@ namespace Kaffee.Controllers
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecurityKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                issuer: "kaffee.dwelsh.uk",
-                audience: "kaffee.dwelsh.uk",
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds);
-
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token)
+                token = TokenProvider.GetToken
+                    (
+                        user, 
+                        _configuration["SecurityKey"], 
+                        DateTime.Now.AddDays(1), 
+                        claims
+                    ),
+                refreshToken = user.RefreshToken
             });
         }
     }

@@ -20,6 +20,8 @@ namespace Kaffee.Models
         [Required, StringLength(100, MinimumLength = 6)]
         public string Password { get; set; }
 
+        public string IV { get; set; }
+
         public string RefreshToken { get; set; }
     }
 }

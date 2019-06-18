@@ -4,6 +4,8 @@ using Kaffee.Models;
 using Kaffee.Services;
 using Kaffee.Providers;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 
 namespace Kaffee.Controllers 
 {
@@ -12,10 +14,12 @@ namespace Kaffee.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
+        private IConfiguration _configuration;
 
-        public UserController(UserService _userService)
+        public UserController(UserService _userService, IConfiguration _configuration)
         {
             this._userService = _userService;
+            this._configuration = _configuration;
         }
 
         [HttpGet("{id:length(24)}", Name = "GetUser")]
@@ -38,8 +42,22 @@ namespace Kaffee.Controllers
                 return Unauthorized("Email already exists.");
             }
             var salt = HashProvider.GetSalt();
+            user.IV = salt;
             user.Password = HashProvider.GetHash(user.Password, salt);
             user.CreatedAt = DateTime.Now;
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            user.RefreshToken = TokenProvider.GetToken
+                (
+                    user, 
+                    _configuration["SecurityKey"], 
+                    DateTime.Now.AddYears(100), 
+                    claims
+                );
             
             _userService.Create(user);
             return CreatedAtRoute("GetUser", new { id = user.Id.ToString() }, user);
@@ -55,7 +73,6 @@ namespace Kaffee.Controllers
             }
 
             _userService.Update(id, userIn);
-
             return NoContent();
         }
 
