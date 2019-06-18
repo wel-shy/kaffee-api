@@ -22,7 +22,6 @@ namespace Kaffee.Controllers
         public ActionResult<User> Get(string id)
         {
             var user = _userService.Get(id);
-
             if (user == null)
             {
                 return NotFound();
@@ -50,7 +49,6 @@ namespace Kaffee.Controllers
         public IActionResult Update(string id, User userIn)
         {
             var user = _userService.Get(id);
-
             if (user == null)
             {
                 return NotFound();
@@ -65,7 +63,6 @@ namespace Kaffee.Controllers
         public IActionResult Delete(string id)
         {
             var user = _userService.Get(id);
-
             if (user == null)
             {
                 return NotFound();

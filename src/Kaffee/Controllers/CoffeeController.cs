@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Kaffee.Models;
 using Kaffee.Services;
-using System;
 
 namespace Kaffee.Controllers 
 {
@@ -28,7 +24,6 @@ namespace Kaffee.Controllers
         public ActionResult<Coffee> Get(string id)
         {
             var coffee = _coffeeService.Get(id);
-
             if (coffee == null)
             {
                 return NotFound();
@@ -41,7 +36,6 @@ namespace Kaffee.Controllers
         public ActionResult<Coffee> Create(Coffee coffee)
         {
             _coffeeService.Create(coffee);
-
             return CreatedAtRoute("GetCoffee", new { id = coffee.Id.ToString() }, coffee);
         }
 
@@ -49,7 +43,6 @@ namespace Kaffee.Controllers
         public IActionResult Update(string id, Coffee coffeeIn)
         {
             var coffee = _coffeeService.Get(id);
-
             if (coffee == null)
             {
                 return NotFound();
@@ -64,7 +57,6 @@ namespace Kaffee.Controllers
         public IActionResult Delete(string id)
         {
             var coffee = _coffeeService.Get(id);
-
             if (coffee == null)
             {
                 return NotFound();
