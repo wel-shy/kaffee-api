@@ -33,8 +33,11 @@ namespace Kaffee.Controllers
         [HttpGet("{id:length(24)}", Name = "GetCoffee")]
         public ActionResult<Coffee> Get(string id)
         {
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
             var coffee = _coffeeService.GetWithId(id);
-            if (coffee == null)
+
+            if (coffee == null || !coffee.UserId.Equals(userId.Value))
             {
                 return NotFound();
             }
@@ -58,14 +61,16 @@ namespace Kaffee.Controllers
         [HttpPut("{id:length(24)}")]
         public IActionResult Update(string id, Coffee coffeeIn)
         {
-            var coffee = _coffeeService.Get(id);
-            if (coffee == null)
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+            var coffee = _coffeeService.GetWithId(id);
+
+            if (coffee == null || !coffee.UserId.Equals(userId.Value))
             {
                 return NotFound();
             }
 
             _coffeeService.Update(id, coffeeIn);
-
             return NoContent();
         }
 
@@ -73,13 +78,15 @@ namespace Kaffee.Controllers
         public IActionResult Delete(string id)
         {
             var coffee = _coffeeService.GetWithId(id);
-            if (coffee == null)
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+
+            if (coffee == null || !coffee.UserId.Equals(userId.Value))
             {
                 return NotFound();
             }
 
             _coffeeService.Remove(coffee.Id);
-
             return NoContent();
         }
     }

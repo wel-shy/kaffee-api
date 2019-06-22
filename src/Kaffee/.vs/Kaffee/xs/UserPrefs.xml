@@ -1,21 +1,21 @@
 ﻿<Properties StartupConfiguration="{FF7994BA-95AD-47C8-A931-AF523A03BD10}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Models/Coffee.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/CoffeeController.cs">
     <Files>
       <File FileName="Program.cs" Line="1" Column="1" />
-      <File FileName="Controllers/CoffeeController.cs" Line="23" Column="1" />
-      <File FileName="Startup.cs" Line="74" Column="1" />
-      <File FileName="Services/CoffeeService.cs" Line="23" Column="1" />
-      <File FileName="Models/Coffee.cs" Line="11" Column="1" />
+      <File FileName="Controllers/CoffeeController.cs" Line="30" Column="4" />
+      <File FileName="Startup.cs" />
+      <File FileName="Services/CoffeeService.cs" />
+      <File FileName="Models/Coffee.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Kaffee" expanded="True">
             <Node name="Kaffee" expanded="True">
-              <Node name="Controllers" expanded="True" />
-              <Node name="Models" expanded="True">
-                <Node name="Coffee.cs" selected="True" />
+              <Node name="Controllers" expanded="True">
+                <Node name="CoffeeController.cs" selected="True" />
               </Node>
+              <Node name="Models" expanded="True" />
               <Node name="Services" expanded="True" />
             </Node>
           </Node>
@@ -27,10 +27,7 @@
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="/Users/daniel/code/kaffee-api/src/Kaffee/Controllers/CoffeeController.cs" relfile="Controllers/CoffeeController.cs" line="10" column="10" />
-      <Breakpoint file="/Users/daniel/code/kaffee-api/src/Kaffee/Controllers/CoffeeController.cs" relfile="Controllers/CoffeeController.cs" line="22" column="1" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
 </Properties>
