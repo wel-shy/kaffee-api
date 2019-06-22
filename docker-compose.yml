@@ -1,5 +1,14 @@
 version: '2'
 services:
+  kaffee:
+    build: .
+    ports:
+      - 5000:80
+    depends_on: 
+      - mongo
+    environment: 
+      KaffeeDatabaseSettings__ConnectionString: "mongodb://root:secret@mongo:27017"
+      SecurityKey: "thisisasupersecretkey"
   mongo:
     image: mongo
     ports:

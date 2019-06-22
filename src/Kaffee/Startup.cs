@@ -38,6 +38,13 @@ namespace Kaffee
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            var token = Configuration.GetSection("KaffeeDatabaseSettings").Get<KaffeeDatabaseSettings>().ConnectionString;
+            var key = Configuration.GetSection("SecurityKey").Get<string>();
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(key)) 
+            {
+                throw new Exception("No connection string or security key given");
+            }
+
             services.Configure<KaffeeDatabaseSettings>(
                 Configuration.GetSection(nameof(KaffeeDatabaseSettings)));
 
@@ -111,8 +118,6 @@ namespace Kaffee
             }
 
             app.UseAuthentication();
-
-            app.UseHttpsRedirection();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();

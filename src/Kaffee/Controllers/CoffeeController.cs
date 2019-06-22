@@ -49,7 +49,7 @@ namespace Kaffee.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        /// <response code="209">Returns the coffee item</response>
+        /// <response code="200">Returns the coffee item</response>
         /// <response code="404">If user does not have a coffee with matching id.</response>     
         [HttpGet("{id:length(24)}", Name = "GetCoffee")]
         [Produces("application/json")]
