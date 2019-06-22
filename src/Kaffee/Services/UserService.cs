@@ -56,9 +56,9 @@ namespace Kaffee.Services
         /// Create a new user.
         /// </summary>
         /// <returns>The new user.</returns>
-        public User Create(User user)
+        public async Task<User> Create(User user)
         {
-            _users.InsertOne(user);
+            await _users.InsertOneAsync(user);
             return user;
         }
         
