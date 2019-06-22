@@ -54,6 +54,15 @@ namespace Kaffee
             services.AddSingleton<CoffeeService>();
             services.AddSingleton<UserService>();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials() );
+            });
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -117,8 +126,9 @@ namespace Kaffee
                 app.UseHsts();
             }
 
+            app.UseCors("CorsPolicy");
             app.UseAuthentication();
-
+            
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 

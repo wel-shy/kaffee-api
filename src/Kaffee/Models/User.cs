@@ -4,7 +4,10 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace Kaffee.Models
-{
+{   
+    /// <summary>
+    /// Model a user.
+    /// </summary>
     public class User
     {
         [BsonId]

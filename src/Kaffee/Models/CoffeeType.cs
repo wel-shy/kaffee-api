@@ -4,8 +4,10 @@ namespace Kaffee.Models
     {
         Americano,
         Espresso,
-        Cappucino,
+        Cappuccino,
         Latte,
-        Freddo    
+        Freddo,
+        FlatWhite,
+        Other    
     }
 }
