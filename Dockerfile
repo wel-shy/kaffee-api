@@ -1,24 +1,16 @@
-# Download Docker image, Node.js running on Alpine
-FROM node:alpine
+# Working image built from guide:
+# https://medium.com/front-end-weekly/net-core-web-api-with-docker-compose-postgresql-and-ef-core-21f47351224f
+FROM microsoft/dotnet:2.2-sdk AS build
+LABEL maintainer="e@dwelsh.uk"
 
-# Make an app directory to hold the server files.
-RUN mkdir /app
-
-# Set the working directory to app.
 WORKDIR /app
+COPY ./src/Kaffee/Kaffee.csproj ./
+RUN dotnet restore Kaffee.csproj
 
-COPY ./package.json /app/package.json
+COPY ./src/Kaffee ./
+RUN dotnet publish Kaffee.csproj -c Release -o out
 
-# Install npm packages.
-RUN yarn install
-
-COPY src /app/src
-COPY tsconfig.json /app/tsconfig.json
-
-RUN yarn run build
-
-# Expose port 80
-EXPOSE 8008
-
-# Start the server.
-CMD npx nodemon dist/App.js
+FROM microsoft/dotnet:2.2-aspnetcore-runtime AS runtime
+WORKDIR /app
+COPY --from=build /app/out .
+ENTRYPOINT ["dotnet", "Kaffee.dll"]

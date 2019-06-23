@@ -1,41 +1,24 @@
 version: '2'
 services:
-  web:
-      build: .
-      ports:
-      - 3000:8008
-      volumes:
-      - "./src/web:/app/web"
-      - "./src/App.ts:/app/App.ts"
-      - "./.env:/app/.env"
-      - "./dist:/app/dist"
-      - "./test:/app/test"
-      depends_on:
-        - mysql
-      links:
-        - mysql
-      environment:
-         LOCAL: ${LOCAL}
-         DEBUG: ${DEBUG}
-         SECRET: ${SECRET}
-         REFRESH_SECRET: ${REFRESH_SECRET}
-         DB_USERNAME: ${DB_USERNAME}
-         DB_HOST: ${DB_HOST}
-         DB_PORT: ${DB_PORT}
-         DB_PASSWORD: ${DB_PASSWORD}
-         DB_DATABASE: ${DB_DATABASE}
-
-  mysql:
-    image: mysql:5.7
-    command: --explicit_defaults_for_timestamp
+  kaffee:
+    build: .
     ports:
-      - 3306:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: kaffee
+      - 5000:80
+    depends_on: 
+      - mongo
+    environment: 
+      KaffeeDatabaseSettings__ConnectionString: "mongodb://root:secret@mongo:27017"
+      SecurityKey: "thisisasupersecretkey"
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
     volumes:
-      - mysql_database:/var/lib/mysql
-    restart: always
+      - 'mongo:/data/db'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
 
 volumes:
   mysql_database:
+  mongo:

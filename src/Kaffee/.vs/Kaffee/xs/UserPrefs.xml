@@ -1,0 +1,33 @@
+﻿<Properties StartupConfiguration="{FF7994BA-95AD-47C8-A931-AF523A03BD10}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/CoffeeController.cs">
+    <Files>
+      <File FileName="Program.cs" Line="1" Column="1" />
+      <File FileName="Controllers/CoffeeController.cs" Line="30" Column="4" />
+      <File FileName="Startup.cs" />
+      <File FileName="Services/CoffeeService.cs" />
+      <File FileName="Models/Coffee.cs" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Kaffee" expanded="True">
+            <Node name="Kaffee" expanded="True">
+              <Node name="Controllers" expanded="True">
+                <Node name="CoffeeController.cs" selected="True" />
+              </Node>
+              <Node name="Models" expanded="True" />
+              <Node name="Services" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.Kaffee PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
