@@ -6,6 +6,8 @@ using Kaffee.Models.ApiResponses.DarkSky;
 using Kaffee.Models;
 using Kaffee.Settings;
 using Newtonsoft.Json;
+using Kaffee.Models.Http;
+using Kaffee.Mappers;
 
 namespace Kaffee.Services
 {
@@ -15,11 +17,19 @@ namespace Kaffee.Services
     public class DarkSkyWeatherService : IWeatherService
     {
         private readonly DarkSkySettings _darkSkySettings;
+        private readonly IHttpClient _httpClient;
+        private readonly IHttpResponseMapper _httpMapper;
         private readonly string _weatherUnit = "si";
 
-        public DarkSkyWeatherService(DarkSkySettings _darkSkySettings)
+        public DarkSkyWeatherService(
+            DarkSkySettings _darkSkySettings,
+            IHttpClient _httpClient,
+            IHttpResponseMapper _httpMapper
+        )
         {
             this._darkSkySettings = _darkSkySettings;
+            this._httpClient = _httpClient;
+            this._httpMapper = _httpMapper;
         }
 
         /// <summary>
@@ -41,15 +51,14 @@ namespace Kaffee.Services
                 );
             Console.WriteLine(uri);
             GetWeather weather = null;
-            using (var client = new HttpClient())
+            using (_httpClient)
             {
-                var response = await client.GetAsync(uri);
+                var response = await _httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception(string.Format("DarkSky returned with code {0}", response.StatusCode));
                 }
-                var json = await response.Content.ReadAsStringAsync();
-                weather = JsonConvert.DeserializeObject<GetWeather>(json);
+                weather = await _httpMapper.ParseResponse<GetWeather>(response);
             }
 
             var now = weather.Hourly.Data[2];
@@ -68,11 +77,6 @@ namespace Kaffee.Services
                 CloudCover = now.CloudCover,
                 UVIndex = now.UVIndex
             };
-        }
-
-        public GetWeather ConvertResponse(string serialisedWeather)
-        {
-            return JsonConvert.DeserializeObject<GetWeather>(serialisedWeather);
         }
     }
 }
