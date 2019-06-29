@@ -3,12 +3,15 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Kaffee.Mappers.Weather;
 using Kaffee.Models.ApiResponses.DarkSky;
-using Kaffee.Models.Weather;
+using Kaffee.Models;
 using Kaffee.Settings;
 using Newtonsoft.Json;
 
 namespace Kaffee.Services
 {
+    /// <summary>
+    /// Weather service using Dark Sky as the data source.
+    /// </summary>
     public class DarkSkyWeatherService : IWeatherService
     {
         private readonly DarkSkySettings _darkSkySettings;
@@ -19,17 +22,24 @@ namespace Kaffee.Services
             this._darkSkySettings = _darkSkySettings;
         }
 
+        /// <summary>
+        /// Get the weather for a location.
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns></returns>
         public async Task<Weather> GetWeather(float latitude, float longitude)
         {
             var uri = string.Format
                 (
-                    "{0}{1}/{2},{3}?unit={4}",
+                    "{0}{1}/{2},{3}?units={4}",
                     _darkSkySettings.Url,
                     _darkSkySettings.Token,
                     latitude,
                     longitude,
                     _weatherUnit
                 );
+            Console.WriteLine(uri);
             GetWeather weather = null;
             using (var client = new HttpClient())
             {

@@ -1,10 +1,15 @@
 using System;
-using Kaffee.Models.ApiResponses.DarkSky;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
-namespace Kaffee.Models.Weather
+namespace Kaffee.Models
 {
     public class Weather
     {
+        [BsonRepresentation(BsonType.String)]
+        [JsonConverter(typeof(StringEnumConverter))]
         public WeatherCondition Condition { get; set; }
         public float Temperature { get; set; }
         public float Latitude { get; set; }

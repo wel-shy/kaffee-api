@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Kaffee.Models.Weather;
+using Kaffee.Models;
 
 namespace Kaffee.Mappers.Weather
 {

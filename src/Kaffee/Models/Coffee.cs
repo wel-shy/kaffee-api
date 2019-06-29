@@ -29,5 +29,7 @@ namespace Kaffee.Models
         
         [RegularExpression(@"^(\-?\d+(\.\d+)?)$", ErrorMessage = "Long/Lat Wrong Format")]
         public string Latitude { get; set; }
+        
+        public Weather Weather { get; set; }
     }
 }

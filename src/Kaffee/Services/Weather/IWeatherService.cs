@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Kaffee.Models.Weather;
+using Kaffee.Models;
 namespace Kaffee.Services
 {
     public interface IWeatherService 

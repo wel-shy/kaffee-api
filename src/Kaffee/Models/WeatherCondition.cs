@@ -1,6 +1,5 @@
-namespace Kaffee.Models.Weather
+namespace Kaffee.Models
 {
-    // clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night, hail, thunderstorm, or tornado
     public enum WeatherCondition
     {
         ClearDay,
