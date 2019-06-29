@@ -6,6 +6,7 @@ using Kaffee.Models.ApiResponses.DarkSky;
 using Kaffee.Models;
 using Kaffee.Settings;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Kaffee.Services
 {
@@ -15,11 +16,17 @@ namespace Kaffee.Services
     public class DarkSkyWeatherService : IWeatherService
     {
         private readonly DarkSkySettings _darkSkySettings;
+        private readonly ILogger<DarkSkyWeatherService> _logger;
         private readonly string _weatherUnit = "si";
 
-        public DarkSkyWeatherService(DarkSkySettings _darkSkySettings)
+        public DarkSkyWeatherService
+        (
+            DarkSkySettings _darkSkySettings,
+            ILogger<DarkSkyWeatherService> _logger
+        )
         {
             this._darkSkySettings = _darkSkySettings;
+            this._logger = _logger;
         }
 
         /// <summary>
@@ -30,6 +37,11 @@ namespace Kaffee.Services
         /// <returns></returns>
         public async Task<Weather> GetWeather(float latitude, float longitude)
         {
+             _logger.LogInformation(
+                "DarkSkyWeatherService - Getting weather for {0},{1}",
+                latitude, 
+                longitude
+            );
             var uri = string.Format
                 (
                     "{0}{1}/{2},{3}?units={4}",
@@ -39,7 +51,6 @@ namespace Kaffee.Services
                     longitude,
                     _weatherUnit
                 );
-            Console.WriteLine(uri);
             GetWeather weather = null;
             using (var client = new HttpClient())
             {
@@ -53,7 +64,6 @@ namespace Kaffee.Services
             }
 
             var now = weather.Hourly.Data[2];
-
             return new Weather
             {
                 Condition = DarkSkyConditionMapper.GetCondition(now.Icon),

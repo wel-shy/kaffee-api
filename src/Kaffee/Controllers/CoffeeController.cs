@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
-namespace Kaffee.Controllers 
+namespace Kaffee.Controllers
 {
     /// <summary>
     /// Handle endpoints for the Coffee resource.
@@ -19,6 +20,7 @@ namespace Kaffee.Controllers
     [ApiController]
     public class CoffeeController : ControllerBase
     {
+        private ILogger<CoffeeController> _logger;
         private readonly CoffeeService _coffeeService;
         private readonly IWeatherService _weatherService;
 
@@ -27,14 +29,17 @@ namespace Kaffee.Controllers
         /// </summary>
         /// <param name="_coffeeService">Service for persisting coffees.</param>
         /// <param name="_weatherService">Service for fetching weather.</param>
+        /// <param name="_logger">Logger</param>
         public CoffeeController
         (
             CoffeeService _coffeeService,
-            IWeatherService _weatherService
+            IWeatherService _weatherService,
+            ILogger<CoffeeController> _logger
         )
         {
             this._coffeeService = _coffeeService;
             this._weatherService = _weatherService;
+            this._logger = _logger;
         }
 
         /// <summary>
@@ -48,6 +53,11 @@ namespace Kaffee.Controllers
         {
             var identity = User.Identity as ClaimsIdentity;
             var id = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+
+            _logger.LogInformation(
+                "CoffeeController - Getting all coffees for user {0}",
+                id.Value
+            );
 
             return _coffeeService.Get(id.Value);
         }
@@ -67,10 +77,21 @@ namespace Kaffee.Controllers
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+            _logger.LogInformation(
+                "CoffeeController - Getting coffee {0} for user {1}",
+                id,
+                userId.Value
+            );
+
             var coffee = _coffeeService.GetWithId(id);
 
             if (coffee == null || !coffee.UserId.Equals(userId.Value))
             {
+                _logger.LogWarning(
+                    "CoffeeController - Could not find coffee {id} for user {0}",
+                    id,
+                    userId.Value
+                );
                 return NotFound();
             }
 
@@ -92,6 +113,11 @@ namespace Kaffee.Controllers
         {
             var identity = User.Identity as ClaimsIdentity;
             var id = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+
+            _logger.LogInformation(
+                "CoffeeController - Creating a coffee for user {0}",
+                id.Value
+            );
 
             coffee.UserId = id.Value;
             coffee.CreatedAt = DateTime.Now;
@@ -128,6 +154,12 @@ namespace Kaffee.Controllers
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+
+            _logger.LogInformation(
+                "CoffeeController - Updating a coffee {0}",
+                id
+            );
+
             var coffee = _coffeeService.GetWithId(id);
 
             if (coffee == null || !coffee.UserId.Equals(userId.Value))
@@ -154,6 +186,11 @@ namespace Kaffee.Controllers
         [ProducesResponseType(404)]
         public IActionResult Delete(string id)
         {
+            _logger.LogInformation(
+                "CoffeeController - Deleting coffee {0}",
+                id
+            );
+
             var coffee = _coffeeService.GetWithId(id);
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);

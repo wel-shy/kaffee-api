@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Kaffee
 {
@@ -38,6 +39,12 @@ namespace Kaffee
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(logging =>
+            {
+                logging.AddConfiguration(Configuration.GetSection("Logging"));
+                logging.AddConsole();
+            });
+            
             var token = Configuration.GetSection("KaffeeDatabaseSettings").Get<KaffeeDatabaseSettings>().ConnectionString;
             var key = Configuration.GetSection("SecurityKey").Get<string>();
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(key))
