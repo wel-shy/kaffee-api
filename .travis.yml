@@ -1,10 +1,12 @@
 language: csharp
-mono: none
-dotnet: 2.2.300
+solution: kaffee-api.sln
 branches:
   only:
   - master
   - /^release\/.*$/
+install:
+  - nuget restore kaffee-api.sln
+  - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
 script:
-  - dotnet restore
-  - dotnet test
+  - xbuild /p:Configuration=Release kaffee-api.sln
+  - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./Kaffee.Tests/bin/Release/Kaffee.Tests.dll
