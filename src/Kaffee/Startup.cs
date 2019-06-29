@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Kaffee.Models;
+using Kaffee.Settings;
 using Kaffee.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -47,9 +47,19 @@ namespace Kaffee
 
             services.Configure<KaffeeDatabaseSettings>(
                 Configuration.GetSection(nameof(KaffeeDatabaseSettings)));
-
             services.AddSingleton<IKaffeeDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<KaffeeDatabaseSettings>>().Value);
+
+            switch (Configuration.GetSection("WeatherService").GetSection("Service").Get<string>())
+            {
+                case "DarkSky":
+                    services.Configure<DarkSkySettings>(
+                        Configuration.GetSection("WeatherService")
+                            .GetSection(nameof(DarkSkySettings))
+                    );
+                    services.AddSingleton<IWeatherService, DarkSkyWeatherService>();
+                    break;
+            }
 
             services.AddSingleton<CoffeeService>();
             services.AddSingleton<UserService>();

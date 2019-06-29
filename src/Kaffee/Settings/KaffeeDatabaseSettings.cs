@@ -1,4 +1,4 @@
-namespace Kaffee.Models
+namespace Kaffee.Settings
 {
     public class KaffeeDatabaseSettings : IKaffeeDatabaseSettings
     {
