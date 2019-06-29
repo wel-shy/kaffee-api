@@ -1,11 +1,9 @@
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Kaffee.Mappers.Weather;
 using Kaffee.Models.ApiResponses.DarkSky;
 using Kaffee.Models;
 using Kaffee.Settings;
-using Newtonsoft.Json;
 using Kaffee.Models.Http;
 using Kaffee.Mappers;
 
@@ -49,7 +47,6 @@ namespace Kaffee.Services
                     longitude,
                     _weatherUnit
                 );
-            Console.WriteLine(uri);
             GetWeather weather = null;
             using (_httpClient)
             {
