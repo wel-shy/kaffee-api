@@ -7,6 +7,7 @@ using Kaffee.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kaffee.Controllers 
 {
@@ -19,14 +20,21 @@ namespace Kaffee.Controllers
     public class CoffeeController : ControllerBase
     {
         private readonly CoffeeService _coffeeService;
+        private readonly IWeatherService _weatherService;
 
         /// <summary>
         /// Create a new instance of the CoffeeController.
         /// </summary>
-        /// <param name="_coffeeService"></param>
-        public CoffeeController(CoffeeService _coffeeService)
+        /// <param name="_coffeeService">Service for persisting coffees.</param>
+        /// <param name="_weatherService">Service for fetching weather.</param>
+        public CoffeeController
+        (
+            CoffeeService _coffeeService,
+            IWeatherService _weatherService
+        )
         {
             this._coffeeService = _coffeeService;
+            this._weatherService = _weatherService;
         }
 
         /// <summary>
@@ -80,13 +88,24 @@ namespace Kaffee.Controllers
         [Produces("application/json")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public ActionResult<Coffee> Create(Coffee coffee)
+        public async Task<ActionResult<Coffee>> Create(Coffee coffee)
         {
             var identity = User.Identity as ClaimsIdentity;
             var id = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
 
             coffee.UserId = id.Value;
             coffee.CreatedAt = DateTime.Now;
+
+            if (!string.IsNullOrEmpty(coffee.Latitude) && !string.IsNullOrEmpty(coffee.Longitude))
+            {
+                var lat = float.Parse(coffee.Latitude);
+                var lon = float.Parse(coffee.Longitude);
+
+                if (!float.IsNaN(lat) && !float.IsNaN(lon))
+                {
+                    coffee.Weather = await _weatherService.GetWeather(lat, lon);
+                }
+            }
 
             _coffeeService.Create(coffee);
             return CreatedAtRoute("GetCoffee", new { id = coffee.Id.ToString() }, coffee);
