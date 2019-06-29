@@ -1,8 +1,15 @@
 language: csharp
-solution: Kaffee.sln
+mono: none
+dist: xenial
+dotnet: 2.2.300
+branches:
+  only:
+  - master
+  - /^release\/.*$/
 install:
-  - nuget restore Kaffee.sln
-  - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
+  - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
 script:
-  - msbuild /p:Configuration=Release Kaffee.sln
-  - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./src/Kaffee.Tests/bin/Release/Kaffee.Tests.dll
+  - dotnet restore
+  - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+after_success:
+  - ./tools/csmacnz.coveralls --opencover -i ./src/Kaffee.Tests/coverage.opencover.xml --useRelativePaths
