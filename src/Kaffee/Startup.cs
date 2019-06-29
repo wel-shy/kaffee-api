@@ -13,6 +13,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
+using Kaffee.Models.Http;
+using Kaffee.Mappers;
 
 namespace Kaffee
 {
@@ -49,6 +51,9 @@ namespace Kaffee
                 Configuration.GetSection(nameof(KaffeeDatabaseSettings)));
             services.AddSingleton<IKaffeeDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<KaffeeDatabaseSettings>>().Value);
+
+            services.AddSingleton<IHttpClient, HttpClientImplementation>();
+            services.AddSingleton<IHttpResponseMapper, HttpResponseMapper>();
 
             // Configure weather service
             switch (Configuration.GetSection("WeatherService").GetSection("Service").Get<string>())
