@@ -1,5 +1,7 @@
 # Kaffee API
 
+[![Generic badge](https://img.shields.io/badge/version-0.3.0-<>.svg)](https://shields.io/)
+
 > API for the Kaffee project.
 
 ## Run
