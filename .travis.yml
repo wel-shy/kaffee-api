@@ -8,4 +8,6 @@ branches:
   - /^release\/.*$/
 script:
   - dotnet restore
-  - dotnet test
+  - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
+  - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+  - ./tools/csmacnz.coveralls --opencover -i ./src/Kaffee.Tests/coverage.opencover.xml --useRelativePaths
