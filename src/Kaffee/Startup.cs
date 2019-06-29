@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Kaffee.Models;
+using Kaffee.Settings;
 using Kaffee.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +13,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
+using Kaffee.Models.Http;
+using Kaffee.Mappers;
 
 namespace Kaffee
 {
@@ -40,16 +42,32 @@ namespace Kaffee
         {
             var token = Configuration.GetSection("KaffeeDatabaseSettings").Get<KaffeeDatabaseSettings>().ConnectionString;
             var key = Configuration.GetSection("SecurityKey").Get<string>();
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(key)) 
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(key))
             {
                 throw new Exception("No connection string or security key given");
             }
 
             services.Configure<KaffeeDatabaseSettings>(
                 Configuration.GetSection(nameof(KaffeeDatabaseSettings)));
-
             services.AddSingleton<IKaffeeDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<KaffeeDatabaseSettings>>().Value);
+
+            services.AddSingleton<IHttpClient, HttpClientImplementation>();
+            services.AddSingleton<IHttpResponseMapper, HttpResponseMapper>();
+
+            // Configure weather service
+            switch (Configuration.GetSection("WeatherService").GetSection("Service").Get<string>())
+            {
+                case "DarkSky":
+                    services.Configure<DarkSkySettings>(
+                        Configuration.GetSection("WeatherService")
+                            .GetSection(nameof(DarkSkySettings))
+                    );
+                    services.AddSingleton<DarkSkySettings>(sp =>
+                        sp.GetRequiredService<IOptions<DarkSkySettings>>().Value);
+                    services.AddSingleton<IWeatherService, DarkSkyWeatherService>();
+                    break;
+            }
 
             services.AddSingleton<CoffeeService>();
             services.AddSingleton<UserService>();
@@ -60,7 +78,7 @@ namespace Kaffee
                     builder => builder.AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .AllowCredentials() );
+                    .AllowCredentials());
             });
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -108,7 +126,7 @@ namespace Kaffee
                 c.DescribeAllEnumsAsStrings();
             });
         }
-        
+
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
@@ -128,7 +146,7 @@ namespace Kaffee
 
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
-            
+
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
@@ -139,7 +157,7 @@ namespace Kaffee
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = string.Empty;
             });
-            
+
             app.UseMvc();
         }
     }

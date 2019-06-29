@@ -72,3 +72,8 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 .env
+lcov.info
+lcov.opencover.xml
+tools/
+coverage.json
+coverage.opencover.xml
