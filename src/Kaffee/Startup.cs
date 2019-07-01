@@ -47,6 +47,11 @@ namespace Kaffee
                 throw new Exception("No connection string or security key given");
             }
 
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = "localhost:6379";
+            });
+
             services.Configure<KaffeeDatabaseSettings>(
                 Configuration.GetSection(nameof(KaffeeDatabaseSettings)));
             services.AddSingleton<IKaffeeDatabaseSettings>(sp =>
