@@ -11,7 +11,7 @@ using Moq;
 using System.Net.Http;
 using Kaffee.Mappers;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Caching.Distributed;
+using Kaffee.Caches;
 
 namespace Kaffee.Tests.Services.Weather
 {
@@ -19,13 +19,13 @@ namespace Kaffee.Tests.Services.Weather
     {
         private Mock<IHttpClient> _mockHttpClient;
         private Mock<IHttpResponseMapper> _mockHttpResponseMapper;
-        private Mock<IDistributedCache> _mockCache;
+        private Mock<IWeatherCache> _mockCache;
 
         public DarkSkyWeatherServiceTests()
         {
             _mockHttpClient = new Mock<IHttpClient>();
             _mockHttpResponseMapper = new Mock<IHttpResponseMapper>();
-            _mockCache = new Mock<IDistributedCache>();
+            _mockCache = new Mock<IWeatherCache>();
         }
         private DarkSkySettings settings = new DarkSkySettings
         {

@@ -7,10 +7,8 @@ using Kaffee.Models;
 using Kaffee.Settings;
 using Kaffee.Models.Http;
 using Kaffee.Mappers;
-using Microsoft.Extensions.Caching.Distributed;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using Kaffee.Caches;
 
 namespace Kaffee.Services
 {
@@ -22,20 +20,20 @@ namespace Kaffee.Services
         private readonly DarkSkySettings _darkSkySettings;
         private readonly IHttpClient _httpClient;
         private readonly IHttpResponseMapper _httpMapper;
-        private readonly IDistributedCache _distributedCache;
+        private readonly IWeatherCache _weatherCache;
         private readonly string _weatherUnit = "si";
 
         public DarkSkyWeatherService(
             DarkSkySettings _darkSkySettings,
             IHttpClient _httpClient,
             IHttpResponseMapper _httpMapper,
-            IDistributedCache _distributedCache
+            IWeatherCache _weatherCache
         )
         {
             this._darkSkySettings = _darkSkySettings;
             this._httpClient = _httpClient;
             this._httpMapper = _httpMapper;
-            this._distributedCache = _distributedCache;
+            this._weatherCache = _weatherCache;
         }
 
         /// <summary>
@@ -46,7 +44,7 @@ namespace Kaffee.Services
         /// <returns></returns>
         public async Task<Weather> GetWeather(float latitude, float longitude)
         {
-            var cachedWeather = await FetchFromCache(latitude, longitude);
+            var cachedWeather = await _weatherCache.GetForecast(latitude, longitude);
             if (cachedWeather != null) 
             {
                 Debug.WriteLine("Fetched from cache: " + cachedWeather.ToString());
@@ -96,65 +94,8 @@ namespace Kaffee.Services
                 );
             }
 
-            await CacheWeather(weatherCollection.ToArray());
+            await _weatherCache.CacheForecasts(weatherCollection.ToArray());
             return weatherCollection[2];
-        }
-
-        /// <summary>
-        /// Store weather in distributed cache.
-        /// </summary>
-        /// <param name="weatherForecast"></param>
-        /// <returns></returns>
-        public async Task CacheWeather(Weather[] weatherForecast)
-        {
-            foreach (var weatherReading in weatherForecast)
-            {
-                // Generate key
-                var key = GetCacheKey(
-                    weatherReading.Latitude, 
-                    weatherReading.Longitude, 
-                    weatherReading.Date
-                );
-
-                await _distributedCache.SetAsync(key, weatherReading.ToByteArray());                
-            }
-        }
-
-        public async Task<Weather> FetchFromCache(float latitude, float longitude)
-        {
-            var pastHour = DateTime.Today.AddHours(DateTime.Now.Hour);
-            var key = GetCacheKey(latitude, longitude, pastHour);
-
-            var weatherBytes = await _distributedCache.GetAsync(key);
-            if (weatherBytes == null || weatherBytes.Length == 0)
-            {
-                return null;
-            }
-            return ByteArrayToWeather(weatherBytes);
-        }
-
-        private string GetCacheKey(float latitude, float longitude, DateTime time)
-        {
-            var unixTime = (time.Date - new DateTime(1970, 1, 1,0,0,0,DateTimeKind.Utc)).TotalSeconds;
-            return string.Format
-            (
-                "{0}_{1}_{2}",
-                Math.Round((decimal) latitude, 2),
-                Math.Round((decimal) longitude, 2),
-                unixTime
-            ); 
-        }
-
-        public Weather ByteArrayToWeather(byte[] arrBytes)
-        {
-            using (var memStream = new MemoryStream())
-            {
-                var binForm = new BinaryFormatter();
-                memStream.Write(arrBytes, 0, arrBytes.Length);
-                memStream.Seek(0, SeekOrigin.Begin);
-                var obj = binForm.Deserialize(memStream);
-                return (Weather)obj;
-            }
         }
     }
 }
