@@ -6,10 +6,12 @@ services:
       - 5000:80
     depends_on: 
       - mongo
+      - redis
     environment: 
       KaffeeDatabaseSettings__ConnectionString: ${MONGO_CONNECTION_STRING}
       WeatherService__DarkSkySettings__Token: ${DARK_SKY_TOKEN}
       SecurityKey: ${SECURITY_KEY}
+  
   mongo:
     image: mongo
     ports:
@@ -19,7 +21,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: secret
+  
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
 
 volumes:
-  mysql_database:
   mongo:

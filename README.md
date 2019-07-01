@@ -5,6 +5,15 @@
 
 > API for the Kaffee project.
 
+## Description
+
+API for logging coffee consumption. Collects weather and location information when a
+coffee if logged for some future machine learning. [Powered by DarkSky](https://darksky.net/poweredby)
+
+### Documentation
+
+Documentation for the endpoints is found [here](https://api.kaffee.dwelsh.uk).
+
 ## Run
 
 Run the command below:

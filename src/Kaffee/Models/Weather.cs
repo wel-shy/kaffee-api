@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
@@ -6,6 +8,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Kaffee.Models
 {
+    [Serializable]
     public class Weather
     {
         [BsonRepresentation(BsonType.String)]
@@ -21,5 +24,20 @@ namespace Kaffee.Models
         public float WindSpeed { get; set; }
         public float CloudCover { get; set; }
         public int UVIndex { get; set; }
+
+        public byte[] ToByteArray()
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            using (var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, this);
+                return ms.ToArray();
+            }
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
 }
