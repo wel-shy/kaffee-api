@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Kaffee.Models;
@@ -27,8 +26,7 @@ namespace Kaffee.Controllers
         /// </summary>
         /// <param name="_coffeeService">Service for persisting coffees.</param>
         /// <param name="_weatherService">Service for fetching weather.</param>
-        public CoffeeController
-        (
+        public CoffeeController(
             CoffeeService _coffeeService,
             IWeatherService _weatherService
         )

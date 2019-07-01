@@ -15,6 +15,7 @@ using System.IO;
 using System.Reflection;
 using Kaffee.Models.Http;
 using Kaffee.Mappers;
+using Kaffee.Caches;
 
 namespace Kaffee
 {
@@ -40,8 +41,12 @@ namespace Kaffee
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            var token = Configuration.GetSection("KaffeeDatabaseSettings").Get<KaffeeDatabaseSettings>().ConnectionString;
+            // Check if a token and security key has been set, fail if not.
+            var token = Configuration.GetSection("KaffeeDatabaseSettings")
+                .Get<KaffeeDatabaseSettings>()
+                .ConnectionString;
             var key = Configuration.GetSection("SecurityKey").Get<string>();
+
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(key))
             {
                 throw new Exception("No connection string or security key given");
@@ -52,11 +57,27 @@ namespace Kaffee
             services.AddSingleton<IKaffeeDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<KaffeeDatabaseSettings>>().Value);
 
+            // Configure redis.
+            var redisSettings = Configuration.GetSection(nameof(RedisSettings))
+                .Get<RedisSettings>();
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = string.Format(
+                    "{0}:{1}",
+                    redisSettings.Url,
+                    redisSettings.Port
+                );
+            });
+
+            // Register the weather cache.
+            services.AddSingleton<IWeatherCache, WeatherCache>();
+
             services.AddSingleton<IHttpClient, HttpClientImplementation>();
             services.AddSingleton<IHttpResponseMapper, HttpResponseMapper>();
 
             // Configure weather service
-            switch (Configuration.GetSection("WeatherService").GetSection("Service").Get<string>())
+            switch (Configuration.GetSection("WeatherService")
+                .GetSection("Service").Get<string>())
             {
                 case "DarkSky":
                     services.Configure<DarkSkySettings>(

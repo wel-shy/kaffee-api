@@ -21,9 +21,10 @@ namespace Kaffee.Services
         public UserService(IKaffeeDatabaseSettings settings)
         {
             var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName, new MongoDatabaseSettings {
-            
-            });
+            var database = client.GetDatabase(
+                settings.DatabaseName, 
+                new MongoDatabaseSettings {}
+            );
 
             _users = database.GetCollection<User>(settings.UserCollectionName);
             _coffees = database.GetCollection<Coffee>(settings.CoffeeCollectionName);

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
 using Kaffee.Mappers.Weather;
@@ -6,6 +7,8 @@ using Kaffee.Models;
 using Kaffee.Settings;
 using Kaffee.Models.Http;
 using Kaffee.Mappers;
+using System.Collections.Generic;
+using Kaffee.Caches;
 
 namespace Kaffee.Services
 {
@@ -17,17 +20,20 @@ namespace Kaffee.Services
         private readonly DarkSkySettings _darkSkySettings;
         private readonly IHttpClient _httpClient;
         private readonly IHttpResponseMapper _httpMapper;
+        private readonly IWeatherCache _weatherCache;
         private readonly string _weatherUnit = "si";
 
         public DarkSkyWeatherService(
             DarkSkySettings _darkSkySettings,
             IHttpClient _httpClient,
-            IHttpResponseMapper _httpMapper
+            IHttpResponseMapper _httpMapper,
+            IWeatherCache _weatherCache
         )
         {
             this._darkSkySettings = _darkSkySettings;
             this._httpClient = _httpClient;
             this._httpMapper = _httpMapper;
+            this._weatherCache = _weatherCache;
         }
 
         /// <summary>
@@ -38,6 +44,15 @@ namespace Kaffee.Services
         /// <returns></returns>
         public async Task<Weather> GetWeather(float latitude, float longitude)
         {
+            var cachedWeather = await _weatherCache.GetForecast(latitude, longitude);
+            if (cachedWeather != null) 
+            {
+                Debug.WriteLine("Fetched from cache: " + cachedWeather.ToString());
+                return cachedWeather;
+            }
+
+            Debug.WriteLine("Fall back to DarkSky api");
+
             var uri = string.Format
                 (
                     "{0}{1}/{2},{3}?units={4}",
@@ -58,22 +73,29 @@ namespace Kaffee.Services
                 weather = await _httpMapper.ParseResponse<GetWeather>(response);
             }
 
-            var now = weather.Hourly.Data[2];
-
-            return new Weather
+            var weatherCollection = new List<Weather>();
+            for (int i = 0; i < weather.Hourly.Data.Length; i++)
             {
-                Condition = DarkSkyConditionMapper.GetCondition(now.Icon),
-                Temperature = now.Temperature,
-                Latitude = latitude,
-                Longitude = longitude,
-                Date = now.Time,
-                PrecipProbability = now.PrecipProbability,
-                Humidity = now.Humidity,
-                Pressure = now.Pressure,
-                WindSpeed = now.WindSpeed,
-                CloudCover = now.CloudCover,
-                UVIndex = now.UVIndex
-            };
+                var now = weather.Hourly.Data[i];
+                weatherCollection.Add( new Weather
+                    {
+                        Condition = DarkSkyConditionMapper.GetCondition(now.Icon),
+                        Temperature = now.Temperature,
+                        Latitude = latitude,
+                        Longitude = longitude,
+                        Date = now.Time,
+                        PrecipProbability = now.PrecipProbability,
+                        Humidity = now.Humidity,
+                        Pressure = now.Pressure,
+                        WindSpeed = now.WindSpeed,
+                        CloudCover = now.CloudCover,
+                        UVIndex = now.UVIndex
+                    }
+                );
+            }
+
+            await _weatherCache.CacheForecasts(weatherCollection.ToArray());
+            return weatherCollection[2];
         }
     }
 }
