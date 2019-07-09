@@ -28,3 +28,9 @@ The API will be available at:
 https://localhost:5001
 http://localhost:5000
 ```
+
+## Test
+
+```console
+dotnet test
+```
