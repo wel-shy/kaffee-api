@@ -16,6 +16,7 @@ using System.Reflection;
 using Kaffee.Models.Http;
 using Kaffee.Mappers;
 using Kaffee.Caches;
+using Kaffee.Services.Email;
 
 namespace Kaffee
 {
@@ -68,6 +69,14 @@ namespace Kaffee
                     redisSettings.Port
                 );
             });
+
+            services.Configure<GmailSettings>(
+                Configuration.GetSection("EmailSettings")
+                    .GetSection(nameof(GmailSettings)));
+            services.AddSingleton<GmailSettings>(sp =>
+                        sp.GetRequiredService<IOptions<GmailSettings>>().Value);
+
+            services.AddSingleton<IEmailService, GmailEmailService>();
 
             // Register the weather cache.
             services.AddSingleton<IWeatherCache, WeatherCache>();

@@ -8,6 +8,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
+using Kaffee.Services.Email;
+using System.Net.Mail;
+using System.Collections.Generic;
 
 namespace Kaffee.Controllers 
 {
@@ -21,16 +24,23 @@ namespace Kaffee.Controllers
     {
         private readonly UserService _userService;
         private IConfiguration _configuration;
+        private IEmailService _emailService;
 
         /// <summary>
         /// Create a new instance of the user controller.
         /// </summary>
         /// <param name="_userService">User service.</param>
         /// <param name="_configuration">Server configuration.</param>
-        public UserController(UserService _userService, IConfiguration _configuration)
+        /// <param name="_emailService">Email sender service.</param>
+        public UserController(
+            UserService _userService, 
+            IConfiguration _configuration,
+            IEmailService _emailService
+        )
         {
             this._userService = _userService;
             this._configuration = _configuration;
+            this._emailService = _emailService;
         }
 
         /// <summary>
@@ -92,6 +102,12 @@ namespace Kaffee.Controllers
                 );
             
             await _userService.Create(user);
+
+            _emailService.SendEmail(new MailAddress("e@dwelsh.uk"), "Welcome to Kaffee", new Dictionary<string, string> 
+            {  
+                { "name", user.Email}
+            });
+
             return CreatedAtRoute("GetUser", new { id = user.Id.ToString() }, user);
         }
 
