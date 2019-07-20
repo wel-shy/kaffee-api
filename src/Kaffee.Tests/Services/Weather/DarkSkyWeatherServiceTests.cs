@@ -12,6 +12,7 @@ using System.Net.Http;
 using Kaffee.Mappers;
 using Newtonsoft.Json;
 using Kaffee.Caches;
+using Microsoft.Extensions.Logging;
 
 namespace Kaffee.Tests.Services.Weather
 {
@@ -62,7 +63,8 @@ namespace Kaffee.Tests.Services.Weather
                     settings, 
                     _mockHttpClient.Object,
                     _mockHttpResponseMapper.Object,
-                    _mockCache.Object
+                    _mockCache.Object,
+                    new LoggerFactory().CreateLogger<DarkSkyWeatherService>()
                 );
             var fetchedWeather = await darkSkyWeatherService.GetWeather(1, 1);
 
