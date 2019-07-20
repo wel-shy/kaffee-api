@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Kaffee.Controllers 
 {
@@ -20,19 +21,23 @@ namespace Kaffee.Controllers
     {
         private readonly CoffeeService _coffeeService;
         private readonly IWeatherService _weatherService;
+        private readonly ILogger<CoffeeController> _logger;
 
         /// <summary>
         /// Create a new instance of the CoffeeController.
         /// </summary>
         /// <param name="_coffeeService">Service for persisting coffees.</param>
         /// <param name="_weatherService">Service for fetching weather.</param>
+        /// <param name="_logger">Logger</param>
         public CoffeeController(
             CoffeeService _coffeeService,
-            IWeatherService _weatherService
+            IWeatherService _weatherService,
+            ILogger<CoffeeController> _logger
         )
         {
             this._coffeeService = _coffeeService;
             this._weatherService = _weatherService;
+            this._logger = _logger;
         }
 
         /// <summary>
@@ -101,7 +106,15 @@ namespace Kaffee.Controllers
 
                 if (!float.IsNaN(lat) && !float.IsNaN(lon))
                 {
-                    coffee.Weather = await _weatherService.GetWeather(lat, lon);
+                    try 
+                    {
+                        coffee.Weather = await _weatherService.GetWeather(lat, lon);
+                    }
+                    catch(Exception e)
+                    {
+                        _logger.LogError(e, "Could not add weather to coffee");
+                    }
+                    
                 }
             }
 

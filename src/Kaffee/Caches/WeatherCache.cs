@@ -21,7 +21,6 @@ namespace Kaffee.Caches
         /// </summary>
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
-        /// <param name="date"></param>
         /// <returns></returns>
         public async Task<Weather> GetForecast(float latitude, float longitude)
         {
