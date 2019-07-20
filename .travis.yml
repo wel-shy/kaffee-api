@@ -1,15 +1,41 @@
 language: csharp
+services:
+  - docker
 mono: none
 dist: xenial
 dotnet: 2.2.300
-branches:
-  only:
-  - master
-  - /^release\/.*$/
-install:
-  - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
-script:
-  - dotnet restore
-  - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-after_success:
-  - ./tools/csmacnz.coveralls --opencover -i ./src/Kaffee.Tests/coverage.opencover.xml --useRelativePaths
+
+stages:
+  - setup
+  - test
+  - build
+  - deploy
+
+setup:
+  script:
+    - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
+    - dotnet restore
+
+test:
+  script:
+    - dotnet test
+
+build:
+  script:
+    - docker build . -t djwelsh/kaffee-api:latest
+  on:
+    branches:
+      only:
+      - master
+      - /feature\/.*/
+    tags: /v.*/
+
+deploy:
+  provider: script
+  script: bash docker_push
+  on:
+    branches:
+      only:
+      - master
+      - /feature\/.*/
+    tags: /v.*/
