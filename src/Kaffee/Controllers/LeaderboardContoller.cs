@@ -144,6 +144,198 @@ namespace Kaffee.Controllers
         }
 
         /// <summary>
+        /// Add a member to a board.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <response code="204">If the board was updated.</response>
+        /// <response code="400">If parameters are wrong.</response>
+        /// <response code="401">If the users does not have permission.</response>
+        /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
+        [HttpPut("{id:length(24)}/members/add")]
+        [Produces("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> AddMember(string id, string email)
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+            var leaderboard = _leaderboardService.Get(id);
+
+            if (leaderboard == null) 
+            {
+                return NotFound();
+            }
+
+            if (!LeaderboardPolicies.CanEdit(leaderboard, userId.Value))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                await _leaderboardService.AddMember(leaderboard, email);
+            }
+            catch (System.Exception e)
+            {
+                if (e.Message.Contains("User not found."))
+                {
+                    return NotFound();
+                }
+                throw e;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Remove a member from a board.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <response code="204">If the board was updated.</response>
+        /// <response code="400">If parameters are wrong.</response>
+        /// <response code="401">If the users does not have permission.</response>
+        /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
+        [HttpDelete("{id:length(24)}/members/remove/{email}")]
+        [Produces("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> RemoveMember(string id, string email)
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+            var leaderboard = _leaderboardService.Get(id);
+
+            if (leaderboard == null) 
+            {
+                return NotFound();
+            }
+
+            if (!LeaderboardPolicies.CanEdit(leaderboard, userId.Value))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                await _leaderboardService.RemoveMember(leaderboard, email);
+            }
+            catch (System.Exception e)
+            {
+                if (e.Message.Contains("User not found."))
+                {
+                    return NotFound();
+                }
+                throw e;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Add an admin to a board.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <response code="204">If the board was updated.</response>
+        /// <response code="400">If parameters are wrong.</response>
+        /// <response code="401">If the users does not have permission.</response>
+        /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
+        [HttpPut("{id:length(24)}/admins/add")]
+        [Produces("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> AddAdmin(string id, string email)
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+            var leaderboard = _leaderboardService.Get(id);
+
+            if (leaderboard == null) 
+            {
+                return NotFound();
+            }
+
+            if (!LeaderboardPolicies.CanEdit(leaderboard, userId.Value))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                await _leaderboardService.AddAdmin(leaderboard, email);
+            }
+            catch (System.Exception e)
+            {
+                if (e.Message.Contains("User not found."))
+                {
+                    return NotFound();
+                }
+                throw e;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Remove an admin from a board.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <response code="204">If the board was updated.</response>
+        /// <response code="400">If parameters are wrong.</response>
+        /// <response code="401">If the users does not have permission.</response>
+        /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
+        [HttpDelete("{id:length(24)}/admins/remove/{email}")]
+        [Produces("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> RemoveAdmin(string id, string email)
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
+            var leaderboard = _leaderboardService.Get(id);
+
+            if (leaderboard == null) 
+            {
+                return NotFound();
+            }
+
+            if (!LeaderboardPolicies.CanEdit(leaderboard, userId.Value))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                await _leaderboardService.RemoveMember(leaderboard, email);
+            }
+            catch (System.Exception e)
+            {
+                if (e.Message.Contains("User not found."))
+                {
+                    return NotFound();
+                }
+                throw e;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
         /// Delete a leaderboard.
         /// </summary>
         /// <param name="id"></param>

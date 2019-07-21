@@ -92,6 +92,7 @@ namespace Kaffee
 
             services.AddSingleton<CoffeeService>();
             services.AddSingleton<UserService>();
+            services.AddSingleton<LeaderboadService>();
 
             services.AddCors(options =>
             {
