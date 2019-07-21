@@ -4,6 +4,7 @@ namespace Kaffee.Settings
     {
         public string CoffeeCollectionName { get; set; }
         public string UserCollectionName { get; set; }
+        public string LeaderboardCollectionName { get; set; }
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
     }
@@ -12,6 +13,7 @@ namespace Kaffee.Settings
     {
         string CoffeeCollectionName { get; set; }
         string UserCollectionName { get; set; }
+        string LeaderboardCollectionName { get; set; }
         string ConnectionString { get; set; }
         string DatabaseName { get; set; }
     }
