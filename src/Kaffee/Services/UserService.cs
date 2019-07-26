@@ -52,7 +52,7 @@ namespace Kaffee.Services
         /// <param name="email">User's email address.</param>
         /// <returns>Matching user.</returns>
         public Task<User> GetWithEmail(string email) =>
-            _users.Find<User>(user => user.Email == email).FirstOrDefaultAsync();
+            _users.Find<User>(user => user.Email.Equals(email)).FirstOrDefaultAsync();
 
         /// <summary>
         /// Create a new user.

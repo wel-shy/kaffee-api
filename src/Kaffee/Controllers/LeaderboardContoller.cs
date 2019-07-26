@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Kaffee.Policies;
+using Kaffee.Models.Requests;
 
 namespace Kaffee.Controllers 
 {
@@ -65,7 +66,7 @@ namespace Kaffee.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public ActionResult<Leaderboard> Get(string id)
+        public ActionResult<LeaderboardData> GetAsync(string id)
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
@@ -81,7 +82,15 @@ namespace Kaffee.Controllers
                 return Unauthorized();
             }
 
-            return leaderboard;
+            var leaderboardMembers = _leaderboardService.GetLeaderboardMembers(leaderboard);
+
+            var leaderboardData = new LeaderboardData
+            {
+                Leaderboard = leaderboard,
+                Members = leaderboardMembers
+            };
+
+            return leaderboardData;
         }
 
         /// <summary>
@@ -100,7 +109,16 @@ namespace Kaffee.Controllers
             var identity = User.Identity as ClaimsIdentity;
             var id = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
 
-            leaderboard.Administrators = new string[] { id.Value };
+            if (leaderboard.Administrators == null)
+            {
+                leaderboard.Administrators = new string[] { id.Value };
+            }
+
+            if (leaderboard.Members == null)
+            {
+                leaderboard.Members = new string [] {};
+            }
+            
             leaderboard.CreatedAt = DateTime.Now;
 
             await _leaderboardService.Create(leaderboard);
@@ -134,7 +152,7 @@ namespace Kaffee.Controllers
                 return NotFound();
             }
 
-            if (!LeaderboardPolicies.CanEdit(boardIn, userId.Value))
+            if (!LeaderboardPolicies.CanEdit(leaderboard, userId.Value))
             {
                 return Unauthorized();
             }
@@ -146,24 +164,23 @@ namespace Kaffee.Controllers
         /// <summary>
         /// Add a member to a board.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="email"></param>
+        /// <param name="req"></param>
         /// <returns></returns>
         /// <response code="204">If the board was updated.</response>
         /// <response code="400">If parameters are wrong.</response>
         /// <response code="401">If the users does not have permission.</response>
         /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
-        [HttpPut("{id:length(24)}/members/add")]
+        [HttpPut("members/add")]
         [Produces("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> AddMember(string id, string email)
+        public async Task<IActionResult> AddMember(LeaderboardMemberRequest req)
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
-            var leaderboard = _leaderboardService.Get(id);
+            var leaderboard = _leaderboardService.Get(req.BoardId);
 
             if (leaderboard == null) 
             {
@@ -177,7 +194,7 @@ namespace Kaffee.Controllers
 
             try
             {
-                await _leaderboardService.AddMember(leaderboard, email);
+                await _leaderboardService.AddMember(leaderboard, req.Email);
             }
             catch (System.Exception e)
             {
@@ -194,24 +211,23 @@ namespace Kaffee.Controllers
         /// <summary>
         /// Remove a member from a board.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="email"></param>
+        /// <param name="req"></param>
         /// <returns></returns>
         /// <response code="204">If the board was updated.</response>
         /// <response code="400">If parameters are wrong.</response>
         /// <response code="401">If the users does not have permission.</response>
         /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
-        [HttpDelete("{id:length(24)}/members/remove/{email}")]
+        [HttpDelete("members/remove/{email}")]
         [Produces("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> RemoveMember(string id, string email)
+        public async Task<IActionResult> RemoveMember(LeaderboardMemberRequest req)
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
-            var leaderboard = _leaderboardService.Get(id);
+            var leaderboard = _leaderboardService.Get(req.BoardId);
 
             if (leaderboard == null) 
             {
@@ -225,7 +241,7 @@ namespace Kaffee.Controllers
 
             try
             {
-                await _leaderboardService.RemoveMember(leaderboard, email);
+                await _leaderboardService.RemoveMember(leaderboard, req.Email);
             }
             catch (System.Exception e)
             {
@@ -242,24 +258,23 @@ namespace Kaffee.Controllers
         /// <summary>
         /// Add an admin to a board.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="email"></param>
+        /// <param name="req"></param>
         /// <returns></returns>
         /// <response code="204">If the board was updated.</response>
         /// <response code="400">If parameters are wrong.</response>
         /// <response code="401">If the users does not have permission.</response>
         /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
-        [HttpPut("{id:length(24)}/admins/add")]
+        [HttpPut("admins/add")]
         [Produces("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> AddAdmin(string id, string email)
+        public async Task<IActionResult> AddAdmin(LeaderboardMemberRequest req)
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
-            var leaderboard = _leaderboardService.Get(id);
+            var leaderboard = _leaderboardService.Get(req.BoardId);
 
             if (leaderboard == null) 
             {
@@ -273,7 +288,7 @@ namespace Kaffee.Controllers
 
             try
             {
-                await _leaderboardService.AddAdmin(leaderboard, email);
+                await _leaderboardService.AddAdmin(leaderboard, req.Email);
             }
             catch (System.Exception e)
             {
@@ -290,24 +305,23 @@ namespace Kaffee.Controllers
         /// <summary>
         /// Remove an admin from a board.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="email"></param>
+        /// <param name="req"></param>
         /// <returns></returns>
         /// <response code="204">If the board was updated.</response>
         /// <response code="400">If parameters are wrong.</response>
         /// <response code="401">If the users does not have permission.</response>
         /// <response code="404">If the user has no board with matching id or user cannot be found.</response>
-        [HttpDelete("{id:length(24)}/admins/remove/{email}")]
+        [HttpDelete("admins/remove/{email}")]
         [Produces("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> RemoveAdmin(string id, string email)
+        public async Task<IActionResult> RemoveAdmin(LeaderboardMemberRequest req)
         {
             var identity = User.Identity as ClaimsIdentity;
             var userId = identity.Claims.First((c) => c.Type == ClaimTypes.PrimarySid);
-            var leaderboard = _leaderboardService.Get(id);
+            var leaderboard = _leaderboardService.Get(req.BoardId);
 
             if (leaderboard == null) 
             {
@@ -321,7 +335,7 @@ namespace Kaffee.Controllers
 
             try
             {
-                await _leaderboardService.RemoveMember(leaderboard, email);
+                await _leaderboardService.RemoveMember(leaderboard, req.Email);
             }
             catch (System.Exception e)
             {

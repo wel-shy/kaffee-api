@@ -14,6 +14,7 @@ namespace Kaffee.Models
         public string Id { get; set; }
 
         [BsonElement("Date")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreatedAt { get; set; }
         
         [BsonRepresentation(BsonType.ObjectId)]
@@ -31,5 +32,10 @@ namespace Kaffee.Models
         public string Latitude { get; set; }
         
         public Weather Weather { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("id: {0}, date: {1}", Id, CreatedAt.ToString());
+        }
     }
 }

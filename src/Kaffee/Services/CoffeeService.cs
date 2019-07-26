@@ -1,3 +1,4 @@
+using System;
 using Kaffee.Models;
 using Kaffee.Settings;
 using MongoDB.Driver;
@@ -25,6 +26,18 @@ namespace Kaffee.Services
 
         public Coffee GetWithId(string id) =>
             _coffees.Find<Coffee>(coffee => coffee.Id == id).FirstOrDefault();
+
+        /// <summary>
+        /// Get coffees after or on a certain date.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="fromDate"></param>
+        /// <returns></returns>
+        public List<Coffee> GetFromDate(string userId, DateTime fromDate) 
+        {
+            var c = _coffees.Find(coffee => coffee.UserId.Equals(userId)).ToList();
+            return c.Where(coffee => DateTime.Compare(fromDate, coffee.CreatedAt) <= 0).ToList();
+        }
 
         public Coffee Create(Coffee coffee)
         {
